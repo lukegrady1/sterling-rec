@@ -1,0 +1,85 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: sterling-postgres
+    environment:
+      POSTGRES_DB: ${PG_DB:-sterling_rec}
+      POSTGRES_USER: ${PG_USER:-recuser}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-recpass}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-recuser} -d ${PG_DB:-sterling_rec}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sterling-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: sterling-redis
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+    networks:
+      - sterling-network
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: sterling-mailhog
+    ports:
+      - "${MAILHOG_SMTP_HOST_PORT:-1025}:1025"
+      - "${MAILHOG_WEB_HOST_PORT:-8025}:8025"
+    networks:
+      - sterling-network
+
+  api:
+    build:
+      context: ../apps/api
+      dockerfile: Dockerfile
+    container_name: sterling-api
+    env_file:
+      - ../.env
+    environment:
+      PG_HOST: postgres
+      REDIS_ADDR: redis:6379
+      SMTP_HOST: mailhog
+      API_PORT: ${API_PORT:-8000}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:5173}
+      GIN_MODE: debug
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      mailhog:
+        condition: service_started
+    ports:
+      - "${API_HOST_PORT:-8000}:${API_PORT:-8000}"
+    networks:
+      - sterling-network
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ../apps/web
+      dockerfile: Dockerfile
+    container_name: sterling-web
+    depends_on:
+      - api
+    ports:
+      - "${WEB_HOST_PORT:-5173}:80"
+    networks:
+      - sterling-network
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+
+networks:
+  sterling-network:
+    driver: bridge
