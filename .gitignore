@@ -2,6 +2,9 @@
 .env
 .env.local
 
+# Claude Code
+.claude/
+
 # Go
 apps/api/tmp/
 *.exe
