@@ -11,6 +11,7 @@ import BookingsPage from './pages/BookingsPage'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import FamilyPage from './pages/FamilyPage'
+import FamilyFormsPage from './pages/FamilyFormsPage'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminPrograms from './pages/admin/Programs'
@@ -20,6 +21,8 @@ import AdminFacilitiesManagement from './pages/admin/FacilitiesManagement'
 import AdminBookings from './pages/admin/Bookings'
 import AdminProgramRegistrations from './pages/admin/ProgramRegistrations'
 import AdminSettings from './pages/admin/Settings'
+import AdminWaivers from './pages/admin/Waivers'
+import AdminFormTemplates from './pages/admin/FormTemplates'
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +40,7 @@ export const router = createBrowserRouter([
       { path: 'login', element: <Login /> },
       { path: 'signup', element: <Signup /> },
       { path: 'account/family', element: <FamilyPage /> },
+      { path: 'account/forms', element: <FamilyFormsPage /> },
     ],
   },
   {
@@ -51,6 +55,8 @@ export const router = createBrowserRouter([
       { path: 'facilities-old', element: <AdminFacilities /> },
       { path: 'bookings', element: <AdminBookings /> },
       { path: 'program-registrations', element: <AdminProgramRegistrations /> },
+      { path: 'waivers', element: <AdminWaivers /> },
+      { path: 'form-templates', element: <AdminFormTemplates /> },
       { path: 'settings', element: <AdminSettings /> },
     ],
   },

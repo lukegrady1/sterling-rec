@@ -22,6 +22,7 @@ import { motion } from 'framer-motion'
 import { useFacility, useFacilityAvailability, useCreateBooking, useMe } from '@/lib/hooks'
 import { AvailabilitySlot } from '@/lib/api'
 import { format, addDays, parseISO } from 'date-fns'
+import { AxiosError } from 'axios'
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -402,7 +403,7 @@ export default function FacilityDetail() {
           {createBooking.isError && (
             <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
               <AlertCircle className="h-4 w-4 inline mr-2" />
-              {(createBooking.error as any)?.response?.data?.error || 'Booking failed. Please try again.'}
+              {(createBooking.error as AxiosError<{ error: string }>)?.response?.data?.error || 'Booking failed. Please try again.'}
             </div>
           )}
         </DialogContent>

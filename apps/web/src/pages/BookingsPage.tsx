@@ -18,6 +18,7 @@ import { motion } from 'framer-motion'
 import { useMyBookings, useCancelBooking } from '@/lib/hooks'
 import { FacilityBooking } from '@/lib/api'
 import { format, parseISO, isPast } from 'date-fns'
+import { AxiosError } from 'axios'
 
 export default function BookingsPage() {
   const [includeHistory, setIncludeHistory] = useState(false)
@@ -321,7 +322,7 @@ export default function BookingsPage() {
           {cancelBooking.isError && (
             <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
               <AlertCircle className="h-4 w-4 inline mr-2" />
-              {(cancelBooking.error as any)?.response?.data?.error || 'Cancellation failed. Please try again.'}
+              {(cancelBooking.error as AxiosError<{ error: string }>)?.response?.data?.error || 'Cancellation failed. Please try again.'}
             </div>
           )}
         </DialogContent>

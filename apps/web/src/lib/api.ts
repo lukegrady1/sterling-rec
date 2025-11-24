@@ -227,6 +227,71 @@ export interface AvailabilitySlot {
   end_time: string
 }
 
+export interface Waiver {
+  id: string
+  title: string
+  description?: string
+  body_html: string
+  version: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ProgramWaiver {
+  id: string
+  program_id: string
+  waiver_id: string
+  is_required: boolean
+  is_per_season: boolean
+  created_at: string
+  waiver?: Waiver
+}
+
+export interface ParticipantWaiverAcceptance {
+  id: string
+  participant_id: string
+  waiver_id: string
+  waiver_version: number
+  program_id?: string
+  accepted_by_user_id: string
+  accepted_at: string
+  ip_address?: string
+  user_agent?: string
+}
+
+export interface ParticipantWaiverStatus {
+  waiver: Waiver
+  program_waiver: ProgramWaiver
+  acceptance?: ParticipantWaiverAcceptance
+  is_accepted: boolean
+  requires_new_version: boolean
+}
+
+export interface FormTemplate {
+  id: string
+  type: 'medical' | 'emergency' | 'custom'
+  title: string
+  description?: string
+  schema_json: any
+  version: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ParticipantFormSubmission {
+  id: string
+  participant_id: string
+  form_template_id: string
+  form_version: number
+  data_json: any
+  submitted_by_user_id: string
+  created_at: string
+  updated_at: string
+  form_template?: FormTemplate
+}
+
 // API functions
 
 export const authAPI = {
@@ -519,5 +584,105 @@ export const participantsAPI = {
   acceptWaiver: async (id: string, waiverKey: string) => {
     const { data } = await getAPI().post(`/participants/${id}/waivers`, { waiver_key: waiverKey })
     return data
+  },
+}
+
+// Waivers API
+export const waiversAPI = {
+  // Public endpoints
+  getProgramWaivers: (programId: string) =>
+    api.get<{ waivers: ProgramWaiver[] }>(`/waivers/program/${programId}`),
+
+  // Parent endpoints
+  getParticipantWaivers: (participantId: string, programId?: string) => {
+    const params = programId ? `?program_id=${programId}` : ''
+    return api.get<{ waivers: ParticipantWaiverStatus[] }>(`/participants/${participantId}/waivers${params}`)
+  },
+
+  acceptParticipantWaiver: (participantId: string, waiverId: string, programId?: string) =>
+    api.post<{ acceptance: ParticipantWaiverAcceptance }>(
+      `/participants/${participantId}/waivers/${waiverId}/accept`,
+      { program_id: programId }
+    ),
+
+  // Admin endpoints
+  list: async (activeOnly: boolean = false) => {
+    const { data } = await getAPI().get(`/admin/waivers?active_only=${activeOnly}`)
+    return data
+  },
+
+  get: async (id: string) => {
+    const { data } = await getAPI().get(`/admin/waivers/${id}`)
+    return data
+  },
+
+  create: async (waiver: Partial<Waiver>) => {
+    const { data } = await getAPI().post('/admin/waivers', waiver)
+    return data
+  },
+
+  update: async (id: string, updates: Partial<Waiver>) => {
+    const { data } = await getAPI().put(`/admin/waivers/${id}`, updates)
+    return data
+  },
+
+  delete: async (id: string) => {
+    await getAPI().delete(`/admin/waivers/${id}`)
+  },
+
+  assignToProgram: async (programId: string, waiverId: string, isRequired: boolean = true, isPerSeason: boolean = false) => {
+    const { data } = await getAPI().post('/admin/program-waivers', {
+      program_id: programId,
+      waiver_id: waiverId,
+      is_required: isRequired,
+      is_per_season: isPerSeason,
+    })
+    return data
+  },
+
+  removeFromProgram: async (programId: string, waiverId: string) => {
+    await getAPI().delete(`/admin/program-waivers?program_id=${programId}&waiver_id=${waiverId}`)
+  },
+}
+
+// Forms API
+export const formsAPI = {
+  // Public endpoints
+  getTemplates: (type?: string) => {
+    const params = type ? `?type=${type}` : ''
+    return api.get<{ form_templates: FormTemplate[] }>(`/form-templates${params}`)
+  },
+
+  // Parent endpoints
+  getParticipantForms: (participantId: string) =>
+    api.get<{ submissions: ParticipantFormSubmission[] }>(`/participants/${participantId}/forms`),
+
+  saveParticipantForm: (participantId: string, formTemplateId: string, formData: any) =>
+    api.post<{ submission: ParticipantFormSubmission }>(`/participants/${participantId}/forms`, {
+      form_template_id: formTemplateId,
+      data_json: formData,
+    }),
+
+  // Admin endpoints
+  listTemplates: async (type?: string, activeOnly: boolean = false) => {
+    const params = new URLSearchParams()
+    if (type) params.append('type', type)
+    if (activeOnly) params.append('active_only', 'true')
+    const { data } = await getAPI().get(`/admin/form-templates?${params}`)
+    return data
+  },
+
+  createTemplate: async (template: Partial<FormTemplate>) => {
+    const { data } = await getAPI().post('/admin/form-templates', template)
+    return data
+  },
+
+  updateTemplate: async (id: string, updates: Partial<FormTemplate>) => {
+    const { data } = await getAPI().put(`/admin/form-templates/${id}`, updates)
+    return data
+  },
+
+  deleteTemplate: async (id: string) => {
+    await getAPI().delete(`/admin/form-templates/${id}`)
   },
 }

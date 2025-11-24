@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import { MapPin, Calendar, Users } from 'lucide-react'
+import { RegistrationWaiverCheck } from '@/components/RegistrationWaiverCheck'
+import { Participant } from '@/lib/api'
 
 export default function ProgramDetail() {
   const { slug } = useParams<{ slug: string }>()
@@ -16,6 +18,7 @@ export default function ProgramDetail() {
   const navigate = useNavigate()
   const [selectedParticipant, setSelectedParticipant] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [showWaiverCheck, setShowWaiverCheck] = useState(false)
 
   if (isLoading) {
     return <div className="container mx-auto px-4 py-12">Loading...</div>
@@ -195,17 +198,36 @@ export default function ProgramDetail() {
             )}
           </div>
 
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirmRegistration}
-              disabled={!selectedParticipant || createRegistration.isPending}
-            >
-              {createRegistration.isPending ? 'Registering...' : 'Confirm Registration'}
-            </Button>
-          </div>
+          {!showWaiverCheck ? (
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (selectedParticipant) {
+                    setShowWaiverCheck(true)
+                  }
+                }}
+                disabled={!selectedParticipant}
+              >
+                Continue
+              </Button>
+            </div>
+          ) : (
+            selectedParticipant && (
+              <RegistrationWaiverCheck
+                programId={program.id}
+                participant={meData?.participants.find((p) => p.id === selectedParticipant)!}
+                onAllWaiversAccepted={handleConfirmRegistration}
+                onCancel={() => {
+                  setShowWaiverCheck(false)
+                  setSelectedParticipant(null)
+                  setIsDialogOpen(false)
+                }}
+              />
+            )
+          )}
         </DialogContent>
       </Dialog>
     </div>

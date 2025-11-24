@@ -1,5 +1,23 @@
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { authAPI, programsAPI, eventsAPI, participantsAPI, registrationsAPI, facilitiesAPI, bookingsAPI } from './api'
+
+// Utility hook for debouncing values
+export function useDebounce<T>(value: T, delay: number = 500): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
 
 // Auth hooks
 export function useMe() {

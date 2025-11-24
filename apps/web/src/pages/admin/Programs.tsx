@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import AdminLayout from '@/components/AdminLayout'
 import { programsAPI } from '@/lib/api'
+import { ProgramWaiversModal } from '@/components/ProgramWaiversModal'
 import {
   useReactTable,
   getCoreRowModel,
@@ -19,6 +20,7 @@ import {
   Edit,
   Trash2,
   Copy,
+  FileText,
   ChevronUp,
   ChevronDown,
   ChevronLeft,
@@ -50,6 +52,7 @@ export default function Programs() {
   const [globalFilter, setGlobalFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [waiversModalProgram, setWaiversModalProgram] = useState<Program | null>(null)
 
   const [formData, setFormData] = useState({
     title: '',
@@ -249,6 +252,13 @@ export default function Programs() {
               title="Edit"
             >
               <Edit className="w-4 h-4 text-brand-primary" />
+            </button>
+            <button
+              onClick={() => setWaiversModalProgram(row.original)}
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              title="Manage Waivers"
+            >
+              <FileText className="w-4 h-4 text-blue-600" />
             </button>
             <button
               onClick={() => handleDuplicate(row.original)}
@@ -624,6 +634,15 @@ export default function Programs() {
               </form>
             </div>
           </div>
+        )}
+
+        {/* Waivers Modal */}
+        {waiversModalProgram && (
+          <ProgramWaiversModal
+            programId={waiversModalProgram.id}
+            programTitle={waiversModalProgram.title}
+            onClose={() => setWaiversModalProgram(null)}
+          />
         )}
       </div>
     </AdminLayout>

@@ -8,7 +8,7 @@ import {
   Building2,
   ClipboardList,
   UserCheck,
-
+  FileText,
   Settings,
   HelpCircle,
   LogOut,
@@ -108,6 +108,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       href: '/admin/program-registrations',
       icon: (
         <UserCheck className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: 'Waivers',
+      href: '/admin/waivers',
+      icon: (
+        <FileText className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: 'Form Templates',
+      href: '/admin/form-templates',
+      icon: (
+        <FileText className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
   ]

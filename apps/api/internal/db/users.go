@@ -102,6 +102,25 @@ func (db *DB) GetUserHousehold(userID uuid.UUID) (*Household, error) {
 	return &h, nil
 }
 
+// GetHouseholdByID retrieves a household by ID
+func (db *DB) GetHouseholdByID(householdID uuid.UUID) (*Household, error) {
+	var h Household
+	err := db.QueryRow(`
+		SELECT id, owner_user_id, name, phone, email, address_line1, city, state, zip, created_at
+		FROM households
+		WHERE id = $1
+	`, householdID).Scan(
+		&h.ID, &h.OwnerUserID, &h.Name, &h.Phone, &h.Email, &h.AddressLine1, &h.City, &h.State, &h.Zip, &h.CreatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get household: %w", err)
+	}
+	return &h, nil
+}
+
 // GetHouseholdParticipants retrieves all participants in a household
 func (db *DB) GetHouseholdParticipants(householdID uuid.UUID) ([]Participant, error) {
 	rows, err := db.Query(`

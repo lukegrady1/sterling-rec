@@ -141,6 +141,12 @@ func main() {
 		api.GET("/facilities", handler.GetFacilities)
 		api.GET("/facilities/:slug", handler.GetFacilityBySlug)
 		api.GET("/facilities/:slug/availability", handler.GetAvailability)
+
+		// Waivers (public)
+		api.GET("/waivers/program/:program_id", handler.GetProgramWaivers)
+
+		// Form templates (public)
+		api.GET("/form-templates", handler.GetFormTemplates)
 	}
 
 	// Protected routes (auth required)
@@ -160,7 +166,12 @@ func main() {
 		protected.PUT("/participants/:id", handler.UpdateParticipantEnhanced)
 		protected.DELETE("/participants/:id", handler.DeleteParticipantEnhanced)
 		protected.GET("/participants/:id/eligibility", handler.GetParticipantEligibility)
-		protected.POST("/participants/:id/waivers", handler.AcceptWaiver)
+
+		// Participant waivers and forms
+		protected.POST("/participants/:id/waivers/:waiver_id/accept", handler.AcceptParticipantWaiver)
+		protected.GET("/participants/:id/waivers", handler.GetParticipantWaivers)
+		protected.POST("/participants/:id/forms", handler.SaveParticipantForm)
+		protected.GET("/participants/:id/forms", handler.GetParticipantForms)
 
 		// Registration
 		protected.POST("/registrations", handler.CreateRegistration)
@@ -217,6 +228,23 @@ func main() {
 		// Bookings (admin)
 		admin.GET("/facilities/:id/bookings", handler.AdminGetFacilityBookings)
 		admin.GET("/bookings/export", handler.AdminExportBookings)
+
+		// Waivers (admin)
+		admin.GET("/waivers", handler.AdminGetAllWaivers)
+		admin.POST("/waivers", handler.AdminCreateWaiver)
+		admin.GET("/waivers/:id", handler.AdminGetWaiver)
+		admin.PUT("/waivers/:id", handler.AdminUpdateWaiver)
+		admin.DELETE("/waivers/:id", handler.AdminDeleteWaiver)
+
+		// Program waivers (admin)
+		admin.POST("/program-waivers", handler.AdminAssignWaiverToProgram)
+		admin.DELETE("/program-waivers", handler.AdminRemoveWaiverFromProgram)
+
+		// Form templates (admin)
+		admin.GET("/form-templates", handler.AdminGetAllFormTemplates)
+		admin.POST("/form-templates", handler.AdminCreateFormTemplate)
+		admin.PUT("/form-templates/:id", handler.AdminUpdateFormTemplate)
+		admin.DELETE("/form-templates/:id", handler.AdminDeleteFormTemplate)
 	}
 
 	// Start server
