@@ -197,8 +197,9 @@ func (h *Handler) GetMe(c *gin.Context) {
 		return
 	}
 
-	var participants []db.Participant
+	participants := []db.Participant{}
 	if household != nil {
+		var err error
 		participants, err = h.db.GetHouseholdParticipants(household.ID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve participants"})

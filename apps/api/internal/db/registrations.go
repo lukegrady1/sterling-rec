@@ -353,7 +353,7 @@ func (db *DB) GetUserRegistrations(userID uuid.UUID) ([]Registration, error) {
 	}
 	defer rows.Close()
 
-	var registrations []Registration
+	registrations := []Registration{}
 	for rows.Next() {
 		var r Registration
 		err := rows.Scan(

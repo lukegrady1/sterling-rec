@@ -39,6 +39,7 @@ export function EventCalendar({ events }: EventCalendarProps) {
   }
 
   const getEventsForDate = (date: Date) => {
+    if (!events || !Array.isArray(events)) return []
     return events.filter(event => {
       if (!event.starts_at) return false
       const eventDate = new Date(event.starts_at)
